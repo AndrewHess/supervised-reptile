@@ -25,7 +25,9 @@ def evaluate(sess,
                          transductive=transductive,
                          pre_step_op=weight_decay(weight_decay_rate))
     total_correct = 0
-    for _ in range(num_samples):
+    for i in range(num_samples):
+        if i % 10 == 0:
+            print('round:', i, '/', num_samples)
         total_correct += reptile.evaluate(dataset, model.input_ph, model.label_ph,
                                           model.minimize_op, model.predictions,
                                           num_classes=num_classes, num_shots=num_shots,
