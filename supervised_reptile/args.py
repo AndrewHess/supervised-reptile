@@ -14,7 +14,9 @@ def argument_parser():
     Get an argument parser for a training script.
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--pretrained', help='evaluate a pre-trained model',
+    parser.add_argument('--pretrained', help='restore weights from the model',
+                        action='store_true', default=False)
+    parser.add_argument('--test', help='evaluate a pre-trained model',
                         action='store_true', default=False)
     parser.add_argument('--seed', help='random seed', default=0, type=int)
     parser.add_argument('--checkpoint', help='checkpoint directory', default='model_checkpoint')
@@ -93,7 +95,29 @@ def evaluate_kwargs(parsed_args):
         'reptile_fn': _args_reptile(parsed_args)
     }
 
+def kwargs_str(parsed_args):
+    res = ''
+
+    kwargs = model_kwargs(parsed_args)
+    res += dict_to_str(kwargs)
+
+    kwargs = train_kwargs(parsed_args)
+    res += dict_to_str(kwargs)
+
+    kwargs = evaluate_kwargs(parsed_args)
+    res += dict_to_str(kwargs)
+
+    return res
+
 def _args_reptile(parsed_args):
     if parsed_args.foml:
         return partial(FOML, tail_shots=parsed_args.foml_tail)
     return Reptile
+
+def dict_to_str(d):
+    res = ''
+
+    for key in d:
+        res += str(key) + str(d[key])
+
+    return res
