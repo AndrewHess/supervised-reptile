@@ -12,7 +12,7 @@ from supervised_reptile.models import OmniglotModel
 from supervised_reptile.omniglot import read_dataset, split_dataset, augment_dataset
 from supervised_reptile.train import train
 
-DATA_DIR = 'data/omniglot'
+DATA_DIR = 'data/omniglot.nosync'
 
 def main():
     """
@@ -28,12 +28,18 @@ def main():
     model = OmniglotModel(args.classes, **model_kwargs(args))
 
     with tf.Session() as sess:
-        if not args.pretrained:
-            print('Training...')
-            train(sess, model, train_set, test_set, args.checkpoint, **train_kwargs(args))
-        else:
+        resume_itr = 0 # Zero iterations have already been trained.
+
+        if args.pretrained or args.test: # It must be pretrained to test it.
             print('Restoring from checkpoint...')
-            tf.train.Saver().restore(sess, tf.train.latest_checkpoint(args.checkpoint))
+            saved_model = tf.train.latest_checkpoint(args.checkpoint)
+            tf.train.Saver().restore(sess, saved_model)
+
+            resume_itr = int(saved_model[saved_model.index('model.ckpt') + 11:])
+
+        if not args.test:
+            print('Training...')
+            train(sess, model, train_set, test_set, args.checkpoint, resume_itr, **train_kwargs(args))
 
         print('Evaluating...')
         eval_kwargs = evaluate_kwargs(args)
