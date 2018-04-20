@@ -16,6 +16,7 @@ def train(sess,
           train_set,
           test_set,
           save_dir,
+          resume_itr=0,
           num_classes=5,
           num_shots=5,
           inner_batch_size=5,
@@ -50,7 +51,7 @@ def train(sess,
     test_writer = tf.summary.FileWriter(os.path.join(save_dir, 'test'), sess.graph)
     tf.global_variables_initializer().run()
     sess.run(tf.global_variables_initializer())
-    for i in range(meta_iters):
+    for i in range(resume_itr, meta_iters):
         frac_done = i / meta_iters
         cur_meta_step_size = frac_done * meta_step_size_final + (1 - frac_done) * meta_step_size
         reptile.train_step(train_set, model.input_ph, model.label_ph, model.minimize_op,
@@ -72,6 +73,8 @@ def train(sess,
                 accuracies.append(correct / num_classes)
             log_fn('batch %d: train=%f test=%f' % (i, accuracies[0], accuracies[1]))
         if i % 100 == 0 or i == meta_iters-1:
+            print('saving...')
             saver.save(sess, os.path.join(save_dir, 'model.ckpt'), global_step=i)
+            print('saved')
         if time_deadline is not None and time.time() > time_deadline:
             break
