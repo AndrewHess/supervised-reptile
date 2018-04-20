@@ -1,4 +1,5 @@
 # Custom output files
+ckpt*
 model_checkpoint
 data
 
