@@ -72,7 +72,7 @@ def train(sess,
                 writer.flush()
                 accuracies.append(correct / num_classes)
             log_fn('batch %d: train=%f test=%f' % (i, accuracies[0], accuracies[1]))
-        if i % 100 == 0 or i == meta_iters-1:
+        if (i != 0 and i % 100 == 0) or i == meta_iters-1:
             print('saving...')
             saver.save(sess, os.path.join(save_dir, 'model.ckpt'), global_step=i)
             print('saved')
